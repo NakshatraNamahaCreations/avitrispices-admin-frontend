@@ -92,11 +92,11 @@ const currentProducts = filteredData.slice(indexOfFirstItem, indexOfLastItem);
     const file = e.target.files[0];
     if (file) {
       const updatedPreviews = [...imagePreviews];
-      updatedPreviews[index] = URL.createObjectURL(file); 
+      updatedPreviews[index] = URL.createObjectURL(file); // Create preview URL
       setImagePreviews(updatedPreviews);
-  
+
       const updatedImages = [...newProduct.images];
-      updatedImages[index] = file; 
+      updatedImages[index] = file; // Store actual file for upload
       setNewProduct({ ...newProduct, images: updatedImages });
     }
   };
@@ -105,9 +105,11 @@ const currentProducts = filteredData.slice(indexOfFirstItem, indexOfLastItem);
 
   
   const handleAddProduct = async () => {
-
-
-
+    if (!newProduct.name || !newProduct.category || !newProduct.price || !newProduct.stock) {
+      alert("Please fill in all required fields.");
+      return;
+    }
+  
     const formData = new FormData();
     formData.append("name", newProduct.name);
     formData.append("category", newProduct.category);
@@ -116,23 +118,31 @@ const currentProducts = filteredData.slice(indexOfFirstItem, indexOfLastItem);
     formData.append("description", newProduct.description);
     formData.append("details", newProduct.details);
     formData.append("stock", newProduct.stock);
-
-
+  
+    // Append only valid image files
     newProduct.images.forEach((image) => {
       if (image instanceof File) {
         formData.append("images", image);
       }
     });
-
+  
     try {
-      await axios.post("https://api.nncwebsitedevelopment.com/api/products", formData, {
+      const response = await axios.post("https://api.nncwebsitedevelopment.com/api/products", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-      window.location.reload();
+  
+      if (response.data.success) {
+        alert("Product added successfully!");
+        window.location.reload();
+      } else {
+        alert("Failed to add product. Please try again.");
+      }
     } catch (error) {
       console.error("Error adding product:", error.response?.data || error);
+      alert("An error occurred while adding the product.");
     }
-};
+  };
+  
 
   
   
