@@ -14,15 +14,21 @@ const Login = () => {
     setError("");
   
     try {
-      const response = await axios.post("https://api.nncwebsitedevelopment.com/api/admin/login", { email, password });
+      const response = await axios.post("https://api.nncwebsitedevelopment.com/api/admin/login", { 
+        email, 
+        password 
+      });
   
-      localStorage.setItem("authToken", response.data.token);
-      localStorage.setItem("username", response.data.username);
+      if (response.data.token) {
+       
+        localStorage.setItem("authToken", response.data.token);
+        localStorage.setItem("username", response.data.username);
   
-      // Add timeout to allow React to process state updates
-      setTimeout(() => {
+       
         navigate("/dashboard");
-      }, 100);
+      } else {
+        setError("Login failed. Please try again.");
+      }
     } catch (err) {
       setError(err.response?.data?.message || "Invalid credentials, please try again.");
     }
