@@ -20,8 +20,6 @@ const Header = () => {
   return (
     <div className="d-flex justify-content-between align-items-center p-3 shadow-sm" style={{ backgroundColor: "", color: "black" }}>
       <h4>Admin Panel</h4>
-
-      {/* Profile Icon & Dropdown */}
       <div className="position-relative">
         <FaUserCircle
           size={35}
@@ -29,17 +27,15 @@ const Header = () => {
           style={{ cursor: "pointer" }}
           onClick={() => setShowDropdown(!showDropdown)}
         />
-
-        {/* Dropdown Menu */}
         {showDropdown && (
           <div
             className="position-absolute bg-white shadow rounded"
             style={{
-              top: "100%", // Ensures dropdown appears below the icon
+              top: "100%", 
               right: "0",
               width: "180px",
               textAlign: "center",
-              zIndex: 1000, // Keeps dropdown above other content
+              zIndex: 1000, 
             }}
           >
             <p className="m-0 fw-bold text-dark">Hi, {username || "Your Account"}</p>
