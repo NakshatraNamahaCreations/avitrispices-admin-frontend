@@ -447,7 +447,7 @@ const handleCategoryChange = (selectedCategory) => {
 
 
 <div style={{ display: "flex", gap: "15px", marginBottom: "20px" }}>
-  {[0, 1, 2].map((index) => (
+  {[0, 1, 2, 3].map((index) => (
     <div
       key={index}
       style={{
