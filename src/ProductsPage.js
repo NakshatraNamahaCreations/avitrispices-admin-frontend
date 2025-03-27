@@ -48,9 +48,11 @@ const ProductsPage = ({ existingProductData }) => {
   const handleAddVariant = () => {
     const { quantity, variantPrice } = newProduct;
     
-    // Ensure both quantity and price are valid
-    const price = parseFloat(variantPrice); // Ensure price is a valid number
-    if (!quantity || isNaN(price) || price <= 0) {
+    // Convert quantity to a number and ensure both quantity and price are valid
+    const quantityNum = parseFloat(quantity);
+    const price = parseFloat(variantPrice);
+    
+    if (isNaN(quantityNum) || isNaN(price) || quantityNum <= 0 || price <= 0) {
       alert("Please provide both valid quantity and price.");
       return;
     }
@@ -60,19 +62,19 @@ const ProductsPage = ({ existingProductData }) => {
       ...newProduct,
       variants: [
         ...newProduct.variants,
-        { quantity, price }, // Add price as a number
+        { quantity: quantityNum, price }, // Add price as a number and quantity as a valid number
       ],
       quantity: "",
       variantPrice: "",
     });
   };
   
+  
   const handleRemoveVariant = (index) => {
     const updatedVariants = newProduct.variants.filter((_, i) => i !== index);
     setNewProduct({ ...newProduct, variants: updatedVariants });
   };
   
-
   const handleEditVariant = (index) => {
     const variant = newProduct.variants[index];
     setNewProduct({
@@ -80,26 +82,38 @@ const ProductsPage = ({ existingProductData }) => {
       quantity: variant.quantity,
       variantPrice: variant.price,
     });
-    setEditingVariantIndex(index);
+    setEditingVariantIndex(index); // Remember which variant is being edited
   };
+  
   
   const handleUpdateVariant = () => {
     if (editingVariantIndex === null) return;
+    
+    const { quantity, variantPrice } = newProduct;
+    const quantityNum = parseFloat(quantity);
+    const price = parseFloat(variantPrice);
   
+    if (isNaN(quantityNum) || isNaN(price) || quantityNum <= 0 || price <= 0) {
+      alert("Please provide both valid quantity and price.");
+      return;
+    }
+  
+    // Update the specific variant
     const updatedVariants = [...newProduct.variants];
     updatedVariants[editingVariantIndex] = {
-      quantity: newProduct.quantity,
-      price: newProduct.variantPrice,
+      quantity: quantityNum,
+      price, // Ensure price is treated as a valid number
     };
   
     setNewProduct({
       ...newProduct,
       variants: updatedVariants,
-      quantity: "",
+      quantity: "",  // Clear fields after update
       variantPrice: "",
     });
-    setEditingVariantIndex(null);
+    setEditingVariantIndex(null); // Reset editing mode
   };
+  
   
   
   const filteredData = searchTerm
@@ -213,49 +227,69 @@ const currentProducts = filteredData.slice(indexOfFirstItem, indexOfLastItem);
     }
   };
   
-const handleUpdateProduct = async () => {
-  try {
-    if (!newProduct._id) {
-      console.error("No product ID found for update.");
-      return;
-    }
 
-    const formData = new FormData();
-    formData.append("name", newProduct.name);
-    formData.append("category", newProduct.category);
-    formData.append("price", newProduct.price);
-    formData.append("description", newProduct.description);
-    formData.append("details", newProduct.details);
-    formData.append("stock", newProduct.stock);
 
-    if (newProduct.images && newProduct.images.length > 0) {
-      newProduct.images.forEach((file) => {
-        formData.append("images", file); 
-      });
-    }
-
-    const response = await axios.put(
-      `https://api.nncwebsitedevelopment.com/api/products/${newProduct._id}`,
-      formData,
-      {
-        headers: { "Content-Type": "multipart/form-data" }, 
+  const handleUpdateProduct = async () => {
+    try {
+      if (!newProduct._id) {
+        console.error("No product ID found for update.");
+        return;
       }
-    );
-
-    if (response.data.success) {
-      alert("Product updated successfully!");
-      setIsAddingProduct(false); 
-      setIsEditingProduct(false); 
-      fetchProducts(); 
-    } else {
-      alert(response.data.message || "Failed to update product.");
+  
+      // Create a new FormData instance
+      const formData = new FormData();
+      
+      formData.append("name", newProduct.name);
+      formData.append("category", newProduct.category);
+      formData.append("category_id", newProduct.categoryId);  // Ensure category_id is included
+      formData.append("description", newProduct.description);
+      formData.append("details", newProduct.details || "");  // Ensure details is included, even if empty
+      formData.append("stock", newProduct.stock);
+    
+      // Append only valid image files
+      newProduct.images.forEach((image) => {
+        if (image instanceof File) {
+          formData.append("images", image);
+        }
+      });
+  
+      // Append variants directly as an array of objects (do not stringify)
+      formData.append("variants", JSON.stringify(newProduct.variants));
+  
+      // Log to inspect the data being sent
+      console.log("Form data being sent:", formData);
+    
+      const response = await axios.put(
+        `https://api.nncwebsitedevelopment.com/api/products/${newProduct._id}`,
+        formData,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+        }
+      );
+    
+      if (response.data.success) {
+        alert("Product updated successfully!");
+        setIsAddingProduct(false);
+        setIsEditingProduct(false);
+        fetchProducts();  // Refresh product list after update
+      } else {
+        alert(response.data.message || "Failed to update product.");
+      }
+    } catch (error) {
+      console.error("Error updating product:", error);
+      if (error.response) {
+        console.error("Response data:", error.response.data);
+      }
+      alert("Failed to update product.");
     }
-  } catch (error) {
-    console.error("Error updating product:", error);
-    alert("Failed to update product.");
-  }
-};
-
+  };
+  
+  
+  
+  
+  
+  
+  
   const handleEditProduct = (productId) => {
     const productToEdit = products.find((product) => product._id === productId);
     
@@ -270,6 +304,7 @@ const handleUpdateProduct = async () => {
       ...productToEdit,
       category: productToEdit.category || "",
       images: productToEdit.images, // Ensure images are set properly
+      variants: productToEdit.variants || [], // Ensure variants are set
     });
   
     setImagePreviews(updatedImagePreviews);
@@ -408,51 +443,15 @@ const handleCategoryChange = (selectedCategory) => {
                 </h2>
               </div>
 
-              {/* <div style={{ display: "flex", gap: "15px", marginBottom: "20px" }}>
-  {[0, 1, 2].map((index) => (
-    <div
-      key={index}
-      style={{
-        width: "200px",
-        height: "338px",
-        border: "3px dashed #ccc",
-      }}
-    >
-      <label htmlFor={`image${index}` }>
-        {imagePreviews[index] ? (
-          <img
-            src={imagePreviews[index]}
-            alt="Preview"
-            style={{
-              width: "100%",
-              height: "100%",
-              objectFit: "cover",
-            }}
-          />
-        ) : (
-          "+ Add Image"
-        )}
-      </label>
-      <input
-        id={`image${index}`}
-        type="file"
-        onChange={(e) => handleImageChange(e, index)}
-        accept="image/*"
-        style={{ display: "none" }}
-      />
-    </div>
-  ))}
-</div> */}
-
 
 
 <div style={{ display: "flex", gap: "15px", marginBottom: "20px" }}>
-  {[0, 1, 2, 3].map((index) => (
+  {[0, 1, 2, 3, 4].map((index) => (
     <div
       key={index}
       style={{
         width: "200px",
-        height: "260px", // 🔒 Fixed height
+        height: "260px", 
         border: "2px dashed #ccc",
         borderRadius: "8px",
         backgroundColor: "#f9f9f9",
@@ -481,7 +480,7 @@ const handleCategoryChange = (selectedCategory) => {
             style={{
               width: "100%",
               height: "100%",
-              objectFit: "cover", // 🔐 This keeps it inside the fixed box
+              objectFit: "cover",
               borderRadius: "8px",
             }}
           />
