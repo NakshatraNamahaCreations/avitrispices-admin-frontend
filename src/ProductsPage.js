@@ -47,27 +47,27 @@ const ProductsPage = ({ existingProductData }) => {
 
   const handleAddVariant = () => {
     const { quantity, variantPrice } = newProduct;
-    
-    // Convert quantity to a number and ensure both quantity and price are valid
-    const quantityNum = parseFloat(quantity);
+  
+    // Ensure price is a valid number
     const price = parseFloat(variantPrice);
     
-    if (isNaN(quantityNum) || isNaN(price) || quantityNum <= 0 || price <= 0) {
-      alert("Please provide both valid quantity and price.");
+    if (!quantity.trim() || isNaN(price) || price <= 0) {
+      alert("Please provide a valid quantity and price.");
       return;
     }
   
-    // Add the quantity-price pair to the variants array
+    // Add the quantity (as string) and price (as number) to variants
     setNewProduct({
       ...newProduct,
       variants: [
         ...newProduct.variants,
-        { quantity: quantityNum, price }, // Add price as a number and quantity as a valid number
+        { quantity, price } // Keep quantity as string, price as number
       ],
       quantity: "",
       variantPrice: "",
     });
   };
+  
   
   
   const handleRemoveVariant = (index) => {
@@ -88,30 +88,26 @@ const ProductsPage = ({ existingProductData }) => {
   
   const handleUpdateVariant = () => {
     if (editingVariantIndex === null) return;
-    
+  
     const { quantity, variantPrice } = newProduct;
-    const quantityNum = parseFloat(quantity);
     const price = parseFloat(variantPrice);
   
-    if (isNaN(quantityNum) || isNaN(price) || quantityNum <= 0 || price <= 0) {
-      alert("Please provide both valid quantity and price.");
+    if (!quantity.trim() || isNaN(price) || price <= 0) {
+      alert("Please provide a valid quantity and price.");
       return;
     }
   
-    // Update the specific variant
+    // Update variant while keeping quantity as a string
     const updatedVariants = [...newProduct.variants];
-    updatedVariants[editingVariantIndex] = {
-      quantity: quantityNum,
-      price, // Ensure price is treated as a valid number
-    };
+    updatedVariants[editingVariantIndex] = { quantity, price };
   
     setNewProduct({
       ...newProduct,
       variants: updatedVariants,
-      quantity: "",  // Clear fields after update
+      quantity: "",
       variantPrice: "",
     });
-    setEditingVariantIndex(null); // Reset editing mode
+    setEditingVariantIndex(null);
   };
   
   
