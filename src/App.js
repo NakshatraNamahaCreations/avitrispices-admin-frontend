@@ -11,6 +11,7 @@ import OrdersPage from "./Component/OrdersPage ";
 import Customer from "./Component/Customer";
 
 import Login from "./Component/Login";
+import ContactPage from "./Component/Contactpage";
 
 function App() {
   const isAuthenticated = !!localStorage.getItem("authToken");
@@ -45,8 +46,8 @@ function MainLayout({ isAuthenticated }) {
           <Route path="/inventory" element={isAuthenticated ? <Inventory /> : <Navigate to="/" />} />
           <Route path="/orders" element={isAuthenticated ? <OrdersPage /> : <Navigate to="/" />} />
           <Route path="/customers" element={isAuthenticated ? <Customer /> : <Navigate to="/" />} />
-          
-         
+          <Route path="/contactpage" element={isAuthenticated ? <ContactPage /> : <Navigate to="/" />} />
+
           <Route path="*" element={<Navigate to={isAuthenticated ? "/dashboard" : "/"} />} />
         </Routes>
       </div>

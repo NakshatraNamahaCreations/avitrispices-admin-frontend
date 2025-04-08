@@ -173,26 +173,25 @@ const currentProducts = filteredData.slice(indexOfFirstItem, indexOfLastItem);
       return;
     }
   
-    // Log the variants to check before sending
+   
     console.log("Variants being sent:", newProduct.variants);
   
     const formData = new FormData();
     formData.append("name", newProduct.name);
     formData.append("category", newProduct.category);
-    formData.append("category_id", newProduct.categoryId);  // No need to append SKU
+    formData.append("category_id", newProduct.categoryId);  
     formData.append("description", newProduct.description);
     formData.append("details", newProduct.details);
     formData.append("stock", newProduct.stock);
   
-    // Append only valid image files
+    
     newProduct.images.forEach((image) => {
       if (image instanceof File) {
         formData.append("images", image);
       }
     });
   
-    // Serialize the variants correctly as a JSON string before appending
-    // Use JSON.stringify() to serialize the variants properly.
+    
     const variantsString = JSON.stringify(newProduct.variants);
     formData.append("variants", variantsString);
   
