@@ -25,6 +25,8 @@ export default function Sidebar() {
     { name: "Orders", path: "/orders", icon: <FaShoppingCart /> },
     { name: "Customers", path: "/customers", icon: <FaUsers /> },
     { name: "Enquiry", path: "/contactpage", icon: <FaBullhorn /> },
+    { name: "Blog", path: "/blog", icon: <FaBullhorn /> },
+
     // { name: "Offers", path: "/voucher", icon: <FaTag /> }, 
   ];
   
